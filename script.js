@@ -2,6 +2,8 @@ var playerOneCode = 1;
 var playerTwoCode = 2;
 var redBlocks = 0;
 var greenBlocks = 0;
+var namePlayer1;
+var namePlayer2;
 var isMillRed = false;
 var isMillGreen = false;
 var isActiveRed = false;
@@ -20,6 +22,7 @@ var columns = 7;
 var clickSound;
 var deathSound;
 var trilhaSound;
+var winnerSound;
 var positionMatrix = new Array(7);
 var referenceMatrix = new Array(7);
 var canvas = document.getElementById("myCanvas");
@@ -27,11 +30,21 @@ var context = canvas.getContext("2d");
 
 
 function initializeGame() {
-    clickSound = new sound("sound.wav");
-    deathSound = new sound("soundExplosion.wav");
-    trilhaSound = new sound("soundTrilha.wav")
+    clickSound  = new sound("sound.wav");
+    deathSound  = new sound("soundExplosion.wav");
+    trilhaSound = new sound("soundTrilha.wav");
+    winnerSound = new sound("soundWinner.wav");
     initializeArray();
-    alert("O Jogador verde começa, em seguida o Jogador vermelho");
+    namePlayer1 = prompt("Nome Jogador 1:");
+    namePlayer2 = prompt("Nome Jogador 2:");
+    if (namePlayer1 === undefined || namePlayer1 == null || namePlayer1.length <= 0) {
+        namePlayer1 = "Verde";
+    }
+    if (namePlayer2 === undefined || namePlayer2 == null || namePlayer2.length <= 0) {
+        namePlayer2 = "Vermelho";
+    }
+    alert("Jogador " + namePlayer1 + /*verde*/" com VERDE começa, em seguida o Jogador "+ namePlayer2 /*vermelho*/ + " com VERMELHO");
+    document.getElementById("turn").innerHTML = namePlayer1
 }
 
 function sound(src) {
@@ -337,10 +350,10 @@ function makeMove(X, Y) {
             context.lineWidth = strokeWidth;
             context.strokeStyle = '#003300';
             context.stroke();
-            document.getElementById("turn").innerHTML = "Verde";
+            document.getElementById("turn").innerHTML = namePlayer1 /*"Verde"*/;
             if (checkMill(X, Y, 2)) {
                 isMillRed = true;
-                document.getElementById("turn").innerHTML = "Vermelho";
+                document.getElementById("turn").innerHTML = namePlayer2 /*"Vermelho"*/;
                 document.getElementById("message").innerHTML = "Trilha formada. Clique em uma peça verde e remova.";
                 trilhaSound.play();
             } else {
@@ -359,10 +372,10 @@ function makeMove(X, Y) {
             context.lineWidth = strokeWidth;
             context.strokeStyle = '#003300';
             context.stroke();
-            document.getElementById("turn").innerHTML = "Vermelho";
+            document.getElementById("turn").innerHTML = namePlayer2 /*"Vermelho"*/;
             if (checkMill(X, Y, 1)) {
                 isMillGreen = true;
-                document.getElementById("turn").innerHTML = "Verde";
+                document.getElementById("turn").innerHTML = namePlayer1 /*"Verde"*/;
                 document.getElementById("message").innerHTML = "Trilha formada. Clique em uma peça vermelha e remova.";
                 trilhaSound.play();
             } else {
@@ -543,14 +556,16 @@ function drawBlock(x, y, X, Y) {
         context.fillStyle = '#F44336';
         if (checkMill(X, Y, 2)) {
             isMillRed = true;
-            document.getElementById("message").innerHTML = "Clique em uma peça Verde para removê-la.";
+            document.getElementById("message").innerHTML = "Trilha formada. Clique em uma peça Verde e remova.";
+            trilhaSound.play();
         }
     } else {
         positionMatrix[X][Y] = 1;
         context.fillStyle = '#2E7D32';
         if (checkMill(X, Y, 1)) {
             isMillGreen = true;
-            document.getElementById("message").innerHTML = "Clique em uma peça vermelha para removê-la.";
+            document.getElementById("message").innerHTML = "Trilha formada. Clique em uma peça Vermelha e remova.";
+            trilhaSound.play();
         }
     }
     context.fill();
@@ -650,24 +665,26 @@ function checkGameOver() {
     //Se restarem menos de 3 jogadores de qualquer equipe.
     if (numberOfTurns >= 18) {
         if (redBlocks < 3 || greenBlocks < 3) {
-            alert("Restam apenas 2 blocos " + ((greenBlocks < 3) ? "Green" : "Red") + "!\n" +
-                "Logo, Jogador " + ((greenBlocks < 3) ? 2 : 1) + " é Campeão!");
-            location.reload(true);
+            alert("Restam apenas 2 blocos " + ((greenBlocks < 3) ? namePlayer1 /*"Green"*/ : namePlayer2 /*"Red"*/) + "!\n" +
+                "Logo, Jogador " + ((greenBlocks < 3) ? namePlayer2 /*2*/ : namePlayer1 /*1*/) + " é Campeão!");
+            winnerSound.play();
+            //location.reload(true);
         }
         else {
             //Check if no adjacent element available for any of the player.
             //Verifica se não há nenhum elemento adjacente disponível para nenhum jogador.
             if (!canMove(playerOneCode, greenBlocks)) {
-                alert("Nenhum movimento possível para o Jogador " + playerOneCode + "\n" +
-                    "Logo, Jogador " + playerTwoCode + " é Campeão!");
-                location.reload(true);
+                alert("Nenhum movimento possível para o Jogador " + namePlayer1 /*playerOneCode*/ + "\n" +
+                    "Logo, Jogador " + namePlayer2 /*playerTwoCode*/ + " é Campeão!");
+                winnerSound.play();
+                //location.reload(true);
             } else if (!canMove(playerTwoCode, redBlocks)) {
-                alert("Nenhum movimento possível para o Jogador " + playerTwoCode + "\n" +
-                    "Logo, Jogador " + playerOneCode + " é Campeão!");
-                location.reload(true);
+                alert("Nenhum movimento possível para o Jogador " + namePlayer2 /*playerTwoCode*/ + "\n" +
+                    "Logo, Jogador " + namePlayer1 /*playerOneCode*/ + " é Campeão!");
+                winnerSound.play();
+                //location.reload(true);
             }
         }
-
     }
 }
 
@@ -769,8 +786,8 @@ function canMove(playerCode, blocksLeft) {
 function update() {
     //Update player turn
     if (numberOfTurns % 2 != 0) {
-        document.getElementById("turn").innerHTML = "Vermelho";
+        document.getElementById("turn").innerHTML = namePlayer2 /*"Vermelho"*/;
     } else {
-        document.getElementById("turn").innerHTML = "Verde";
+        document.getElementById("turn").innerHTML = namePlayer1 /*"Verde"*/;
     }
 }
